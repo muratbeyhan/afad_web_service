@@ -7,50 +7,50 @@ from streamlit_folium import st_folium
 from branca.element import Template, MacroElement
 import altair as alt
 
-st.set_page_config(page_title="AFAD Deprem Analiz Paneli", layout="wide")
-st.title("🌋 AFAD Deprem Veri Arama ve Haritalama")
+st.set_page_config(page_title="AFAD Earthquake Analysis Dashboard", layout="wide")
+st.title("🌋 AFAD Earthquake Data Search and Mapping")
 
 if "deprem_df" not in st.session_state:
     st.session_state["deprem_df"] = None
 
-# --- KENAR ÇUBUĞU (FİLTRELER) ---
-st.sidebar.header("🔍 Filtre Parametreleri")
+# --- SIDEBAR (FILTERS) ---
+st.sidebar.header("🔍 Filter Parameters")
 
-st.sidebar.subheader("📅 Zaman Aralığı")
+st.sidebar.subheader("📅 Time Range")
 col_d1, col_d2 = st.sidebar.columns(2)
-start_date = col_d1.date_input("Başlangıç Tarihi", datetime(2024, 1, 1))
-end_date = col_d2.date_input("Bitiş Tarihi", datetime.now().date())
+start_date = col_d1.date_input("Start Date", datetime(2024, 1, 1))
+end_date = col_d2.date_input("End Date", datetime.now().date())
 
 col_t1, col_t2 = st.sidebar.columns(2)
-start_time = col_t1.time_input("Başlangıç Saat", time(0, 0))
-end_time = col_t2.time_input("Bitiş Saat", time(23, 59))
+start_time = col_t1.time_input("Start Time", time(0, 0))
+end_time = col_t2.time_input("End Time", time(23, 59))
 
 start_str = (
     f"{start_date.strftime('%Y-%m-%d')} {start_time.strftime('%H:%M:%S')}"
 )
 end_str = f"{end_date.strftime('%Y-%m-%d')} {end_time.strftime('%H:%M:%S')}"
 
-st.sidebar.subheader("📍 Enlem & Boylam")
+st.sidebar.subheader("📍 Latitude & Longitude")
 col_lat1, col_lat2 = st.sidebar.columns(2)
 min_lat = col_lat1.number_input(
-    "Min Enlem", value=34.0, min_value=33.0, max_value=44.0, step=0.1
+    "Min Latitude", value=34.0, min_value=33.0, max_value=44.0, step=0.1
 )
 max_lat = col_lat2.number_input(
-    "Max Enlem", value=42.0, min_value=33.0, max_value=44.0, step=0.1
+    "Max Latitude", value=42.0, min_value=33.0, max_value=44.0, step=0.1
 )
 
 col_lon1, col_lon2 = st.sidebar.columns(2)
 min_lon = col_lon1.number_input(
-    "Min Boylam", value=24.0, min_value=23.0, max_value=46.0, step=0.1
+    "Min Longitude", value=24.0, min_value=23.0, max_value=46.0, step=0.1
 )
 max_lon = col_lon2.number_input(
-    "Max Boylam", value=45.0, min_value=23.0, max_value=46.0, step=0.1
+    "Max Longitude", value=45.0, min_value=23.0, max_value=46.0, step=0.1
 )
 
-st.sidebar.subheader("📊 Büyüklük & Derinlik")
-min_mag, max_mag = st.sidebar.slider("Büyüklük (M)", 0.0, 9.0, (5.0, 8.0))
+st.sidebar.subheader("📊 Magnitude & Depth")
+min_mag, max_mag = st.sidebar.slider("Magnitude (M)", 0.0, 9.0, (5.0, 8.0))
 min_depth, max_depth = st.sidebar.slider(
-    "Derinlik (km)", 0.0, 100.0, (0.0, 50.0)
+    "Depth (km)", 0.0, 100.0, (0.0, 50.0)
 )
 
 
@@ -70,17 +70,17 @@ def afad_verilerini_getir(params):
             res_data = response.json()
             if isinstance(res_data, list):
                 return res_data, None
-            return [], "API beklenmeyen bir format döndürdü."
+            return [], "API returned an unexpected format."
         else:
             return (
                 None,
-                f"HTTP Hata Kodu: {response.status_code} - Yanıt: {response.text}",
+                f"HTTP Error Code: {response.status_code} - Response: {response.text}",
             )
     except Exception as e:
-        return None, f"Bağlantı hatası: {str(e)}"
+        return None, f"Connection error: {str(e)}"
 
 
-if st.sidebar.button("Depremleri Getir", type="primary"):
+if st.sidebar.button("Get Earthquakes", type="primary"):
     params = {
         "start": start_str,
         "end": end_str,
@@ -94,11 +94,11 @@ if st.sidebar.button("Depremleri Getir", type="primary"):
         "maxdepth": str(int(max_depth) if max_depth.is_integer() else max_depth),
     }
 
-    with st.spinner("AFAD API'den veriler çekiliyor..."):
+    with st.spinner("Fetching earthquake data from AFAD API..."):
         raw_data, error_msg = afad_verilerini_getir(params)
 
     if error_msg:
-        st.error(f"Veri çekme hatası: {error_msg}")
+        st.error(f"Data retrieval error: {error_msg}")
         st.session_state["deprem_df"] = None
     elif raw_data and len(raw_data) > 0:
         df = pd.DataFrame(raw_data)
@@ -108,7 +108,7 @@ if st.sidebar.button("Depremleri Getir", type="primary"):
         st.session_state["deprem_df"] = df
     else:
         st.warning(
-            "Seçilen kriter aralığında kayıtlı deprem verisi bulunamadı."
+            "No earthquake data was found for the selected criteria."
         )
         st.session_state["deprem_df"] = None
 
@@ -116,9 +116,9 @@ df = st.session_state["deprem_df"]
 
 if df is not None and not df.empty:
     c1, c2, c3 = st.columns(3)
-    c1.metric("Toplam Deprem", len(df))
-    c2.metric("Maksimum Büyüklük", f"{df['magnitude'].max():.1f} M")
-    c3.metric("Ortalama Derinlik", f"{df['depth'].mean():.1f} km")
+    c1.metric("Total Earthquakes", len(df))
+    c2.metric("Maximum Magnitude", f"{df['magnitude'].max():.1f} M")
+    c3.metric("Average Depth", f"{df['depth'].mean():.1f} km")
 
     m = folium.Map(
         location=[df["latitude"].mean(), df["longitude"].mean()], zoom_start=6
@@ -141,10 +141,10 @@ if df is not None and not df.empty:
     # DOĞRUDAN HARİTAYA (m) EKLENİYOR
     for _, row in df.iterrows():
         popup_html = f"""
-        <b>Yer:</b> {row.get('location', 'Bilinmiyor')}<br>
-        <b>Büyüklük:</b> {row.get('magnitude', '-')}<br>
-        <b>Derinlik:</b> {row.get('depth', '-')} km<br>
-        <b>Tarih:</b> {row.get('date', '')}
+        <b>Location:</b> {row.get('location', 'Unknown')}<br>
+        <b>Magnitude:</b> {row.get('magnitude', '-')}<br>
+        <b>Depth:</b> {row.get('depth', '-')} km<br>
+        <b>Date:</b> {row.get('date', '')}
         """
         folium.CircleMarker(
             location=[row["latitude"], row["longitude"]],
@@ -166,7 +166,7 @@ if df is not None and not df.empty:
     legend_html = """
     {% macro html(this, kwargs) %}
     <div style="position: fixed; bottom: 20px; right: 20px; z-index:9999; background-color: white; padding: 10px; border: 2px solid grey; border-radius: 6px; box-shadow: 2px 2px 6px rgba(0,0,0,0.2); color: #111;">
-        <h4 style="margin:0 0 6px 0">Büyüklük (M)</h4>
+        <h4 style="margin:0 0 6px 0">Magnitude (M)</h4>
         <div style="font-size:13px; line-height:18px;">
             <div><i style="background:yellow; width:14px; height:14px; display:inline-block; margin-right:8px; vertical-align:middle;"></i><span style="margin-left:6px;color:#111">&lt; 3.0</span></div>
             <div><i style="background:orange; width:14px; height:14px; display:inline-block; margin-right:8px; vertical-align:middle;"></i><span style="margin-left:6px;color:#111">3.0 - 3.9</span></div>
@@ -186,10 +186,10 @@ if df is not None and not df.empty:
     # Haritayı bir kez render et
     st_folium(m, width="100%", height=500, returned_objects=[])
 
-    with st.expander("📄 Veri Tablosu"):
+    with st.expander("📄 Data Table"):
         st.dataframe(df)
 
-    # --- İSTATİSTİKSEL GRAFİK: Magnitüd aralıklarına göre toplam deprem sayıları
+    # --- STATISTICAL GRAPH: total number of earthquakes by magnitude range
     mag_bins = [0, 3.0, 4.0, 5.0, 6.0, 7.0, 10.0]
     mag_labels = ["< 3.0", "3.0 - 3.9", "4.0 - 4.9", "5.0 - 5.9", "6.0 - 6.9", "≥ 7.0"]
     mag_series = df['magnitude'].dropna()
@@ -199,16 +199,16 @@ if df is not None and not df.empty:
         counts_df = pd.DataFrame({'range': counts.index.astype(str), 'count': counts.values})
 
         base = alt.Chart(counts_df).encode(
-            x=alt.X('range:N', sort=mag_labels, title='Magnitüd Aralığı'),
-            y=alt.Y('count:Q', title='Deprem Sayısı'),
+            x=alt.X('range:N', sort=mag_labels, title='Magnitude Range'),
+            y=alt.Y('count:Q', title='Earthquake Count'),
             color=alt.Color('range:N', legend=None)
         )
-        bars = base.mark_bar().properties(title='Magnitüd Aralıklarına Göre Deprem Sayıları', width='container', height=300)
+        bars = base.mark_bar().properties(title='Earthquake Counts by Magnitude Range', width='container', height=300)
         labels = base.mark_text(dy=-10, color='black').encode(text=alt.Text('count:Q'))
         chart = (bars + labels)
         st.altair_chart(chart, use_container_width=True)
     else:
-        st.info('Grafik için yeterli magnitüd verisi yok.')
+        st.info('Not enough magnitude data available for the chart.')
 else:
     if st.session_state["deprem_df"] is None:
-        st.info("Sol taraftaki filtreden tarih ve bölge seçip butona basınız.")
+        st.info("Select a date and region from the left panel and click the button.")
