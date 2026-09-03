@@ -225,7 +225,16 @@ if df is not None and not df.empty:
             "OpenStreetMap", name="OpenStreetMap", control=True
         ),
         "OpenStreetMap Terrain": folium.TileLayer(
-            "Stamen Terrain", name="OpenStreetMap Terrain", control=True
+            tiles="https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png",
+            attr=(
+                'Map tiles by <a href="https://stamen.com">Stamen Design</a>, '
+                'under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> | '
+                'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            ),
+            name="OpenStreetMap Terrain",
+            control=True,
+            subdomains="abcd",
+            max_zoom=18,
         ),
         "CartoDB Positron": folium.TileLayer(
             "CartoDB positron", name="CartoDB Positron", control=True
