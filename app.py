@@ -47,9 +47,30 @@ st.markdown(
         padding: 0.9rem 1rem;
     }
     .stExpander {
-        background: rgba(15, 23, 42, 0.6);
+        background: rgba(15, 23, 42, 0.72);
         border-radius: 12px;
         border: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+    }
+    .stButton > button {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.2rem;
+        font-weight: 700;
+        box-shadow: 0 10px 24px rgba(239, 68, 68, 0.25);
+    }
+    .stButton > button:hover {
+        filter: brightness(1.05);
+    }
+    .stDataFrame {
+        background: rgba(15, 23, 42, 0.7);
+        border-radius: 12px;
+    }
+    iframe {
+        border-radius: 14px !important;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
     }
     </style>
     """,
@@ -81,18 +102,18 @@ end_str = f"{end_date.strftime('%Y-%m-%d')} {end_time.strftime('%H:%M:%S')}"
 st.sidebar.subheader("📍 Latitude & Longitude")
 col_lat1, col_lat2 = st.sidebar.columns(2)
 min_lat = col_lat1.number_input(
-    "Min Latitude", value=34.0, min_value=33.0, max_value=44.0, step=0.1
+    "Min Latitude", value=34.0, min_value=33.0, max_value=44.0, step=0.01
 )
 max_lat = col_lat2.number_input(
-    "Max Latitude", value=42.0, min_value=33.0, max_value=44.0, step=0.1
+    "Max Latitude", value=42.0, min_value=33.0, max_value=44.0, step=0.01
 )
 
 col_lon1, col_lon2 = st.sidebar.columns(2)
 min_lon = col_lon1.number_input(
-    "Min Longitude", value=24.0, min_value=23.0, max_value=46.0, step=0.1
+    "Min Longitude", value=24.0, min_value=23.0, max_value=46.0, step=0.01
 )
 max_lon = col_lon2.number_input(
-    "Max Longitude", value=45.0, min_value=23.0, max_value=46.0, step=0.1
+    "Max Longitude", value=45.0, min_value=23.0, max_value=46.0, step=0.01
 )
 
 st.sidebar.subheader("📊 Magnitude & Depth")
@@ -181,7 +202,9 @@ if df is not None and not df.empty:
     st.markdown("<hr style='border: 1px solid rgba(148,163,184,0.25); margin: 0.8rem 0 1.2rem 0;'>", unsafe_allow_html=True)
 
     m = folium.Map(
-        location=[df["latitude"].mean(), df["longitude"].mean()], zoom_start=6
+        location=[df["latitude"].mean(), df["longitude"].mean()],
+        zoom_start=6,
+        tiles="CartoDB positron",
     )
 
     def rengi_getir(mag):
