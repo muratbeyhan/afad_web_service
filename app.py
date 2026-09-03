@@ -229,19 +229,6 @@ if df is not None and not df.empty:
             control=True,
             show=True,  # default visible layer
         ),
-        "Terrain": folium.TileLayer(
-            tiles="https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png",
-            attr=(
-                'Map tiles by <a href="https://stamen.com">Stamen Design</a>, '
-                'under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> | '
-                'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            ),
-            name="Terrain",
-            control=True,
-            subdomains="abcd",
-            max_zoom=18,
-            show=False,
-        ),
         "Satellite": folium.TileLayer(
             tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
             attr=(
