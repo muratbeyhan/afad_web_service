@@ -214,36 +214,48 @@ if df is not None and not df.empty:
     st.markdown("<hr style='border: 1px solid rgba(148,163,184,0.25); margin: 0.8rem 0 1.2rem 0;'>", unsafe_allow_html=True)
 
     mapbox_key = get_mapbox_key()
+    # Initialize map without a default tile to avoid duplicate OpenStreetMap layers
     m = folium.Map(
         location=[df["latitude"].mean(), df["longitude"].mean()],
         zoom_start=6,
-        tiles="OpenStreetMap",
+        tiles=None,
     )
 
+    # Base layer definitions (no CartoDB entries that require keys)
     base_layers = {
         "OpenStreetMap": folium.TileLayer(
-            "OpenStreetMap", name="OpenStreetMap", control=True
+            tiles="OpenStreetMap",
+            name="OpenStreetMap",
+            control=True,
+            show=True,  # default visible layer
         ),
-        "OpenStreetMap Terrain": folium.TileLayer(
+        "Terrain": folium.TileLayer(
             tiles="https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png",
             attr=(
                 'Map tiles by <a href="https://stamen.com">Stamen Design</a>, '
                 'under <a href="https://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> | '
                 'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             ),
-            name="OpenStreetMap Terrain",
+            name="Terrain",
             control=True,
             subdomains="abcd",
             max_zoom=18,
+            show=False,
         ),
-        "CartoDB Positron": folium.TileLayer(
-            "CartoDB positron", name="CartoDB Positron", control=True
-        ),
-        "CartoDB Dark Matter": folium.TileLayer(
-            "CartoDB dark_matter", name="CartoDB Dark Matter", control=True
+        "Satellite": folium.TileLayer(
+            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            attr=(
+                'Tiles &copy; Esri | Sources: Esri, Maxar, Earthstar Geographics, '
+                'and the GIS User Community'
+            ),
+            name="Satellite",
+            control=True,
+            max_zoom=19,
+            show=False,
         ),
     }
 
+    # Optional Mapbox (only added if key present)
     if mapbox_key:
         base_layers["Mapbox Streets"] = folium.TileLayer(
             tiles=(
@@ -253,8 +265,10 @@ if df is not None and not df.empty:
             attr="Mapbox © OpenStreetMap",
             name="Mapbox Streets",
             control=True,
+            show=False,
         )
 
+    # Add layers to map
     for layer in base_layers.values():
         layer.add_to(m)
 
