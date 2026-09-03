@@ -8,6 +8,54 @@ from branca.element import Template, MacroElement
 import altair as alt
 
 st.set_page_config(page_title="AFAD Earthquake Analysis Dashboard", layout="wide")
+
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+        color: #e5e7eb;
+    }
+    .block-container {
+        padding-top: 1.5rem;
+        padding-bottom: 2rem;
+    }
+    h1 {
+        color: #f8fafc !important;
+        font-size: 2.2rem !important;
+        margin-bottom: 0.7rem !important;
+    }
+    [data-testid="stSidebar"] {
+        background: #0b1120;
+        border-right: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .stSidebar .stSelectbox, .stSidebar .stDateInput, .stSidebar .stNumberInput, .stSidebar .stSlider, .stSidebar .stTimeInput {
+        background: rgba(15, 23, 42, 0.65);
+        border-radius: 10px;
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 1.6rem !important;
+        color: #f8fafc !important;
+    }
+    div[data-testid="stMetricLabel"] {
+        color: #cbd5e1 !important;
+    }
+    div[data-testid="stMetric"] {
+        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+    }
+    .stExpander {
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("🌋 AFAD Earthquake Data Search and Mapping")
 
 if "deprem_df" not in st.session_state:
@@ -119,6 +167,8 @@ if df is not None and not df.empty:
     c1.metric("Total Earthquakes", len(df))
     c2.metric("Maximum Magnitude", f"{df['magnitude'].max():.1f} M")
     c3.metric("Average Depth", f"{df['depth'].mean():.1f} km")
+
+    st.markdown("<hr style='border: 1px solid rgba(148,163,184,0.25); margin: 0.8rem 0 1.2rem 0;'>", unsafe_allow_html=True)
 
     m = folium.Map(
         location=[df["latitude"].mean(), df["longitude"].mean()], zoom_start=6
