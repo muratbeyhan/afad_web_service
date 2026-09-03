@@ -96,9 +96,19 @@ max_lon = col_lon2.number_input(
 )
 
 st.sidebar.subheader("📊 Magnitude & Depth")
-min_mag, max_mag = st.sidebar.slider("Magnitude (M)", 0.0, 9.0, (5.0, 8.0))
+min_mag, max_mag = st.sidebar.slider(
+    "Magnitude (M)",
+    min_value=0.0,
+    max_value=9.0,
+    value=(5.0, 8.0),
+    step=0.1,
+)
 min_depth, max_depth = st.sidebar.slider(
-    "Depth (km)", 0.0, 100.0, (0.0, 50.0)
+    "Depth (km)",
+    min_value=0.0,
+    max_value=100.0,
+    value=(0.0, 50.0),
+    step=0.1,
 )
 
 
