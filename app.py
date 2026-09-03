@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, time
 import folium
 import pandas as pd
@@ -81,6 +82,17 @@ st.title("🌋 AFAD Earthquake Data Search and Mapping")
 
 if "deprem_df" not in st.session_state:
     st.session_state["deprem_df"] = None
+
+
+def get_mapbox_key():
+    try:
+        key = st.secrets.get("MAPBOX_API_KEY")
+    except Exception:
+        key = None
+    if not key:
+        key = os.getenv("MAPBOX_API_KEY")
+    return key
+
 
 # --- SIDEBAR (FILTERS) ---
 st.sidebar.header("🔍 Filter Parameters")
@@ -201,11 +213,43 @@ if df is not None and not df.empty:
 
     st.markdown("<hr style='border: 1px solid rgba(148,163,184,0.25); margin: 0.8rem 0 1.2rem 0;'>", unsafe_allow_html=True)
 
+    mapbox_key = get_mapbox_key()
     m = folium.Map(
         location=[df["latitude"].mean(), df["longitude"].mean()],
         zoom_start=6,
-        tiles="CartoDB positron",
+        tiles="OpenStreetMap",
     )
+
+    base_layers = {
+        "OpenStreetMap": folium.TileLayer(
+            "OpenStreetMap", name="OpenStreetMap", control=True
+        ),
+        "OpenStreetMap Terrain": folium.TileLayer(
+            "Stamen Terrain", name="OpenStreetMap Terrain", control=True
+        ),
+        "CartoDB Positron": folium.TileLayer(
+            "CartoDB positron", name="CartoDB Positron", control=True
+        ),
+        "CartoDB Dark Matter": folium.TileLayer(
+            "CartoDB dark_matter", name="CartoDB Dark Matter", control=True
+        ),
+    }
+
+    if mapbox_key:
+        base_layers["Mapbox Streets"] = folium.TileLayer(
+            tiles=(
+                "https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}"
+                f"?access_token={mapbox_key}"
+            ),
+            attr="Mapbox © OpenStreetMap",
+            name="Mapbox Streets",
+            control=True,
+        )
+
+    for layer in base_layers.values():
+        layer.add_to(m)
+
+    folium.LayerControl(position="topleft").add_to(m)
 
     def rengi_getir(mag):
         if mag < 3.0:
