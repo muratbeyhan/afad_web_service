@@ -1,24 +1,28 @@
 # AFAD Web Service — Earthquake Data Dashboard
 
-This repository contains a Streamlit dashboard application developed to fetch and visualize earthquake event data provided by AFAD (Disaster and Emergency Management Authority of Turkey). The app retrieves data from AFAD's public API and offers users an interactive interface for filtering, mapping, and exploring earthquake events.
+This repository contains a Streamlit application designed to fetch, visualize, and analyze earthquake data via web service endpoints provided by AFAD (Disaster and Emergency Management Authority of Turkey).
 
-## Key features
+The application uses AFAD's public API (`https://deprem.afad.gov.tr/apiv2/event/filter`) to perform dynamic earthquake searches based on time, depth, magnitude, and spatial parameters.
 
-- Fetch earthquake events from AFAD's API for a specified date/time and geographic bounding box
-- Filter by latitude/longitude, date/time range, magnitude, and depth
-- Interactive Folium map with one `CircleMarker` per earthquake, scaled by magnitude
-- Base-layer selector: OpenStreetMap and Satellite (Esri World Imagery). Optional Mapbox support if you provide a Mapbox API key
-- Magnitude legend on the map
-- Altair charts showing magnitude distribution and a data table for details
-- English UI with a dark, polished theme
+## 🚀 Key Features
 
-## How it works / Architecture
+- **Dual Spatial Bounds Source:**
+  - **Map Canvas (Interactive Zoom):** Automatically detects the live viewport bounds of the map as you zoom or pan, fetching earthquakes strictly within the currently displayed area.
+  - **Manual Coordinate Input:** Allows users to manually specify latitude (`Min/Max Lat`) and longitude (`Min/Max Lon`) ranges from the sidebar.
+- **AFAD API & .NET Compatibility:** Formats numeric values (`fmt_num`) and timestamps (`YYYY-MM-DD HH:MM:SS`) to adhere strictly to AFAD's `.NET` backend requirements, preventing `HTTP 500 Internal Server Error` and `FormatException` issues.
+- **State & Viewport Persistence:** Powered by `st_folium` and Streamlit session state (`st.session_state`), ensuring that map zoom levels and pan centers do not reset unexpectedly upon button clicks or user interaction.
+- **Interactive Folium Map:** Custom `CircleMarker` elements color-coded and scaled according to earthquake magnitudes, featuring pop-up detail cards (location, magnitude, depth, date/time).
+- **Multi-Layer Base Maps:** OpenStreetMap and Esri World Imagery (Satellite) are included by default. Mapbox Streets layer is dynamically enabled if a valid `MAPBOX_API_KEY` is provided.
+- **Comprehensive Error Logging:** Surface API errors, connectivity issues, or unexpected data payloads directly in the Streamlit UI with `st.error`/`st.warning` boxes and collapsible debug technical panels.
+- **Charts and Analytics:** Built-in summary metrics (Total Earthquakes, Max Magnitude, Average Depth), an Altair magnitude distribution bar chart, and an expandable raw data table.
 
-1. The user selects a date/time range, geographic bounding box (min/max lat/lon), magnitude range, and depth range in the left sidebar.
-2. Clicking the "Get Earthquakes" button calls AFAD's filter endpoint: `https://deprem.afad.gov.tr/apiv2/event/filter` with the selected parameters.
-3. Returned JSON is converted to a pandas DataFrame; numeric columns are coerced and invalid rows are dropped.
-4. Each earthquake is plotted on a Folium map with a popup showing location, magnitude, depth, and date.
-5. The user can switch the map base layer between OpenStreetMap and Satellite. If a `MAPBOX_API_KEY` is provided via environment variable or Streamlit secrets, Mapbox Streets appears as an additional option.
+## 🛠️ How It Works / Architecture
+
+1. **Spatial Mode Selection:** The user selects the spatial query mode ("Map Canvas" or "Manual Coordinate Input").
+2. **Filtering Parameters:** Date/time intervals, magnitude, and depth ranges are configured in the sidebar.
+3. **Data Retrieval:** Clicking the "Get Earthquakes" button formats the parameters and dispatches a GET request to the AFAD API endpoint.
+4. **Data Processing:** The returned JSON array is converted into a pandas DataFrame, parsed into numeric datatypes (`pd.to_numeric`), cleaned of invalid coordinates, and stored in `st.session_state["deprem_df"]`.
+5. **Visualization:** Earthquake events are rendered on the Folium map alongside metric tiles, an Altair chart, and a pandas DataFrame view.
 
 ## Mapbox API key (optional)
 
@@ -64,7 +68,27 @@ Contributions are welcome. Please open an issue for feature requests or bug repo
 
 ## License
 
-This repository does not include a license file by default. If you plan to open-source it, consider adding an MIT or other permissive license.
+MIT License
+
+Copyright (c) 2026 Murat Beyhan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ## Disclaimer
 
