@@ -117,8 +117,17 @@ def fmt_num(val):
 
 
 # ---------------------------------------------------------
-# 2. SIDEBAR FILTERS
+# 2. SIDEBAR FILTERS & MAP LAYER SELECTION
 # ---------------------------------------------------------
+st.sidebar.header("🗺️ Map Appearance")
+mapbox_key = get_mapbox_key()
+
+available_layers = ["OpenStreetMap", "Satellite"]
+if mapbox_key:
+    available_layers.append("Mapbox Streets")
+
+selected_base_layer = st.sidebar.selectbox("Base Map Style", options=available_layers, index=0)
+
 st.sidebar.header("🔍 Filter Parameters")
 
 area_selection_mode = st.sidebar.radio(
@@ -247,44 +256,30 @@ if df is not None and not df.empty:
 # ---------------------------------------------------------
 # 4. MAP RENDERING
 # ---------------------------------------------------------
-mapbox_key = get_mapbox_key()
-
 m = folium.Map(
     location=st.session_state["map_center"],
     zoom_start=st.session_state["map_zoom"],
     tiles=None,
 )
 
-base_layers = {
-    "OpenStreetMap": folium.TileLayer(
-        tiles="OpenStreetMap",
-        name="OpenStreetMap",
-        control=True,
-        show=True,
-    ),
-    "Satellite": folium.TileLayer(
+# Add selected base layer based on sidebar choice
+if selected_base_layer == "OpenStreetMap":
+    folium.TileLayer(tiles="OpenStreetMap", name="OpenStreetMap", control=False).add_to(m)
+elif selected_base_layer == "Satellite":
+    folium.TileLayer(
         tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         attr='Tiles &copy; Esri | Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
         name="Satellite",
-        control=True,
+        control=False,
         max_zoom=19,
-        show=False,
-    ),
-}
-
-if mapbox_key:
-    base_layers["Mapbox Streets"] = folium.TileLayer(
+    ).add_to(m)
+elif selected_base_layer == "Mapbox Streets" and mapbox_key:
+    folium.TileLayer(
         tiles=f"https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{{z}}/{{x}}/{{y}}?access_token={mapbox_key}",
         attr="Mapbox © OpenStreetMap",
         name="Mapbox Streets",
-        control=True,
-        show=False,
-    )
-
-for layer in base_layers.values():
-    layer.add_to(m)
-
-folium.LayerControl(position="topleft").add_to(m)
+        control=False,
+    ).add_to(m)
 
 
 def rengi_getir(mag):
