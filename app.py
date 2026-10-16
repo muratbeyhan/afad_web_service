@@ -138,7 +138,7 @@ area_selection_mode = st.sidebar.radio(
 
 st.sidebar.subheader("📅 Time Range")
 col_d1, col_d2 = st.sidebar.columns(2)
-start_date = col_d1.date_input("Start Date", datetime(2026, 1, 1))
+start_date = col_d1.date_input("Start Date", datetime(2026, 1, 1), min_value=datetime(1900, 1, 1))
 end_date = col_d2.date_input("End Date", datetime.now().date())
 
 col_t1, col_t2 = st.sidebar.columns(2)
