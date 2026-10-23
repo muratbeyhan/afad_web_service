@@ -61,19 +61,17 @@ def fmt_num1(val):
 def afad_verilerini_getir(params):
     base_url = "https://deprem.afad.gov.tr/apiv2/event/filter"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "Accept": "application/json",
     }
     try:
-        response = requests.get(base_url, params=params, headers=headers, timeout=15)
+        # Parametrelerin doğru formatta gittiğinden emin olmak için timeout ve params'ı iletiyoruz
+        response = requests.get(base_url, params=params, headers=headers, timeout=20)
         
-        # --- GEÇİCİ DEBUG BİLGİSİ ---
+        # Debug çıktıları
         st.write(f"🔍 API Durum Kodu: {response.status_code}")
         st.write(f"🔍 Gelen Ham Yanıt Uzunluğu: {len(response.text)}")
-        if len(response.text) < 200:
-            st.write(f"🔍 Gelen Yanıt İçeriği: {response.text}")
-        # ---------------------------
-
+        
         if response.status_code == 200:
             res_data = response.json()
             if isinstance(res_data, list):
