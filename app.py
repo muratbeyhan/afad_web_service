@@ -9,6 +9,7 @@ from datetime import datetime, time
 import folium
 from streamlit_folium import st_folium
 from branca.element import Template, MacroElement
+from zoneinfo import ZoneInfo
 
 st.set_page_config(page_title="Turkey Earthquakes - AFAD Live", layout="wide")
 
@@ -121,6 +122,11 @@ with st.sidebar:
     )
 
     st.subheader('📅 Time Range')
+    # Türkiye saat dilimini baz alarak güncel tarihi ve saati alıyoruz
+    tr_tz = ZoneInfo("Europe/Istanbul")
+    simdi_tr = datetime.now(tr_tz)
+    bugun_tr = simdi_tr.date()
+    
     col_d1, col_d2 = st.columns(2)
     start_date = col_d1.date_input('Start Date', datetime(2026, 1, 1), min_value=datetime(1900, 1, 1))
     end_date = col_d2.date_input('End Date', datetime.now().date())
