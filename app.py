@@ -38,10 +38,18 @@ def get_mapbox_key():
     return os.getenv("MAPBOX_API_KEY", None)
 
 def fmt_num(val):
+    # Eğer değer string formatında ve içinde virgül varsa noktaya çevir
+    if isinstance(val, str):
+        val = val.replace(',', '.')
+    
     f_val = float(val)
+    
+    # Python float-to-string dönüşümleri her zaman nokta (.) kullanır
     if f_val.is_integer():
         return str(int(f_val))
-    return str(round(f_val, 2))
+    
+    # Ondalıklı sayılarda gereksiz sıfırları temizleyerek nokta formatında döndürür
+    return f"{f_val:.2f}".rstrip('0').rstrip('.')
 
 def afad_verilerini_getir(params):
     base_url = "https://deprem.afad.gov.tr/apiv2/event/filter"
