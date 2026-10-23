@@ -310,7 +310,7 @@ if df is not None and not df.empty:
 
     # --- TAB MAG: MAGNITUDE DISTRIBUTION CHART ---
     with tab_mag:
-        st.subheader("Earthquake Count by Magnitude Range (Standardized Colors)")
+        st.subheader("Earthquake Count by Magnitude Range")
         
         min_round = math.ceil(min_mag)
         max_round = math.floor(max_mag)
