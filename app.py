@@ -38,6 +38,12 @@ def get_mapbox_key():
     return os.getenv("MAPBOX_API_KEY", None)
 
 def fmt_num(val):
+    f_val = float(val)
+    if f_val.is_integer():
+        return str(int(f_val))
+    return str(round(f_val, 2))
+
+def fmt_num1(val):
     # Eğer değer string formatında ve içinde virgül varsa noktaya çevir
     if isinstance(val, str):
         val = val.replace(',', '.')
@@ -52,6 +58,32 @@ def fmt_num(val):
     return f"{f_val:.2f}".rstrip('0').rstrip('.')
 
 def afad_verilerini_getir(params):
+    base_url = "https://deprem.afad.gov.tr/apiv2/event/filter"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json",
+    }
+    try:
+        response = requests.get(base_url, params=params, headers=headers, timeout=15)
+        
+        # --- GEÇİCİ DEBUG BİLGİSİ ---
+        st.write(f"🔍 API Durum Kodu: {response.status_code}")
+        st.write(f"🔍 Gelen Ham Yanıt Uzunluğu: {len(response.text)}")
+        if len(response.text) < 200:
+            st.write(f"🔍 Gelen Yanıt İçeriği: {response.text}")
+        # ---------------------------
+
+        if response.status_code == 200:
+            res_data = response.json()
+            if isinstance(res_data, list):
+                return res_data, None, None
+            return [], "API beklenmeyen bir format döndürdü.", str(res_data)
+        else:
+            return None, f"HTTP Hata Kodu: {response.status_code}", response.text
+    except Exception as e:
+        return None, f"Bağlantı/İstek Hatası: {str(e)}", traceback.format_exc()
+
+def afad_verilerini_getir1(params):
     base_url = "https://deprem.afad.gov.tr/apiv2/event/filter"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
