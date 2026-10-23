@@ -203,7 +203,7 @@ if df is not None and not df.empty:
 
     # --- TAB 1: FOLIUM MAP ONLY ---
     with tab1:
-        st.subheader("Earthquake Map (Interactive Layer Control - USGS Standard)")
+        st.subheader("Earthquake Map")
         
         m = folium.Map(
             location=st.session_state["map_center"],
@@ -263,7 +263,7 @@ if df is not None and not df.empty:
         legend_html = """
         {% macro html(this, kwargs) %}
         <div style="position: fixed; bottom: 20px; right: 20px; z-index:9999; background-color: white; padding: 10px; border: 2px solid grey; border-radius: 6px; box-shadow: 2px 2px 6px rgba(0,0,0,0.2); color: #111;">
-            <h5 style="margin:0 0 6px 0">USGS / EMSC Lejantı</h5>
+            <h5 style="margin:0 0 6px 0">Magnitude (M)</h5>
             <div style="font-size:11px; line-height:18px;">
                 <div><i style="background:#a0aec0; width:14px; height:14px; display:inline-block; margin-right:8px; vertical-align:middle;"></i>0.0 - 2.9</div>
                 <div><i style="background:#ecc94b; width:14px; height:14px; display:inline-block; margin-right:8px; vertical-align:middle;"></i>3.0 - 3.9</div>
