@@ -68,6 +68,12 @@ def afad_verilerini_getir(params):
         # Parametrelerin doğru formatta gittiğinden emin olmak için timeout ve params'ı iletiyoruz
         response = requests.get(base_url, params=params, headers=headers, timeout=20)
         
+        # 1. requests kütüphanesinin sürümü
+        st.write("📦 Requests Sürümü:", requests.__version__)
+
+        # 2. AFAD'a giden tam URL (Parametrelerin nasıl encode edildiğini görmek için)
+        st.write("🌐 Gönderilen Tam URL:", response.url)
+        
         # Debug çıktıları
         st.write(f"🔍 API Durum Kodu: {response.status_code}")
         st.write(f"🔍 Gelen Ham Yanıt Uzunluğu: {len(response.text)}")
@@ -423,7 +429,7 @@ if df is not None and not df.empty:
         fig_bar.update_layout(xaxis_tickangle=0, showlegend=False)
         fig_bar.update_yaxes(type="log")
 
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width=True)
 
     # --- TAB 2: NUMBER OF EARTHQUAKES ---
     with tab2:
