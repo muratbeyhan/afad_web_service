@@ -196,6 +196,12 @@ with st.sidebar:
                 df_fetched['DateOnly'] = df_fetched['Date'].str.split('T').str[0]
                 df_fetched['DateOnly'] = pd.to_datetime(df_fetched['DateOnly'], errors='coerce')
                 
+                # --- BURAYA EKLEYEBİLİRSİNİZ ---
+                st.write("🔍 Gelen verideki toplam deprem sayısı:", len(df_fetched))
+                if not df_fetched.empty and 'magnitude' in df_fetched.columns:
+                    st.write("🔍 Gelen verideki maksimum magnitüd:", df_fetched['magnitude'].max())
+                # --------------------------------
+                
                 st.session_state["deprem_df"] = df_fetched
                 st.success(f"✅ {len(df_fetched)} earthquakes fetched successfully!")
 
