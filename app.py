@@ -24,9 +24,9 @@ if "map_zoom" not in st.session_state:
     st.session_state["map_zoom"] = 6
 if "live_bounds" not in st.session_state:
     st.session_state["live_bounds"] = {
-        "min_lat": 35.0,
-        "max_lat": 43.0,
-        "min_lon": 25.0,
+        "min_lat": 36.0,
+        "max_lat": 42.0,
+        "min_lon": 26.0,
         "max_lon": 45.0,
     }
 
@@ -121,7 +121,7 @@ with st.sidebar:
     
     area_selection_mode = st.radio(
         "📍 Spatial Bounds Source",
-        options=["Map Canvas (Interactive Zoom)", "Manual Coordinate Input"],
+        options=["Manual Coordinate Input", "Map Canvas (Interactive Zoom)"],
         index=0,
     )
 
