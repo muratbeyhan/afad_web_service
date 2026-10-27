@@ -44,20 +44,6 @@ def fmt_num(val):
         return str(int(f_val))
     return str(round(f_val, 2))
 
-def fmt_num1(val):
-    # Eğer değer string formatında ve içinde virgül varsa noktaya çevir
-    if isinstance(val, str):
-        val = val.replace(',', '.')
-    
-    f_val = float(val)
-    
-    # Python float-to-string dönüşümleri her zaman nokta (.) kullanır
-    if f_val.is_integer():
-        return str(int(f_val))
-    
-    # Ondalıklı sayılarda gereksiz sıfırları temizleyerek nokta formatında döndürür
-    return f"{f_val:.2f}".rstrip('0').rstrip('.')
-
 def afad_verilerini_getir(params):
     base_url = "https://deprem.afad.gov.tr/apiv2/event/filter"
     headers = {
@@ -65,42 +51,13 @@ def afad_verilerini_getir(params):
         "Accept": "application/json",
     }
     try:
-        # Parametrelerin doğru formatta gittiğinden emin olmak için timeout ve params'ı iletiyoruz
         response = requests.get(base_url, params=params, headers=headers, timeout=20)
-        
-        # 1. requests kütüphanesinin sürümü
-        st.write("📦 Requests Sürümü:", requests.__version__)
-
-        # 2. AFAD'a giden tam URL (Parametrelerin nasıl encode edildiğini görmek için)
-        st.write("🌐 Gönderilen Tam URL:", response.url)
-        
-        # Debug çıktıları
-        st.write(f"🔍 API Durum Kodu: {response.status_code}")
-        st.write(f"🔍 Gelen Ham Yanıt Uzunluğu: {len(response.text)}")
         
         if response.status_code == 200:
             res_data = response.json()
             if isinstance(res_data, list):
                 return res_data, None, None
             return [], "API beklenmeyen bir format döndürdü.", str(res_data)
-        else:
-            return None, f"HTTP Hata Kodu: {response.status_code}", response.text
-    except Exception as e:
-        return None, f"Bağlantı/İstek Hatası: {str(e)}", traceback.format_exc()
-
-def afad_verilerini_getir1(params):
-    base_url = "https://deprem.afad.gov.tr/apiv2/event/filter"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "application/json",
-    }
-    try:
-        response = requests.get(base_url, params=params, headers=headers, timeout=15)
-        if response.status_code == 200:
-            res_data = response.json()
-            if isinstance(res_data, list):
-                return res_data, None, None
-            return [], "API beklenmeyen bir format döndürdü (liste değil).", str(res_data)
         else:
             return None, f"HTTP Hata Kodu: {response.status_code}", response.text
     except Exception as e:
@@ -119,14 +76,14 @@ with st.sidebar:
 
     st.subheader('🔍 Filter Parameters')
     
+    # Varsayılan olarak Map Canvas (Interactive Zoom) seçildi
     area_selection_mode = st.radio(
         "📍 Spatial Bounds Source",
-        options=["Manual Coordinate Input", "Map Canvas (Interactive Zoom)"],
+        options=["Map Canvas (Interactive Zoom)", "Manual Coordinate Input"],
         index=0,
     )
 
     st.subheader('📅 Time Range')
-    # Türkiye saat dilimini baz alarak güncel tarihi ve saati alıyoruz
     tr_tz = ZoneInfo("Europe/Istanbul")
     simdi_tr = datetime.now(tr_tz)
     bugun_tr = simdi_tr.date()
@@ -142,6 +99,7 @@ with st.sidebar:
     start_str = f"{start_date.strftime('%Y-%m-%d')} {start_time.strftime('%H:%M:%S')}"
     end_str = f"{end_date.strftime('%Y-%m-%d')} {end_time.strftime('%H:%M:%S')}"
     
+    # Sadece manuel seçim aktifse koordinat kutularını göster
     if area_selection_mode == "Manual Coordinate Input":
         st.subheader('📍 Latitude & Longitude')
         col_lat1, col_lat2 = st.columns(2)
@@ -206,12 +164,6 @@ with st.sidebar:
                 df_fetched['DateOnly'] = df_fetched['Date'].str.split('T').str[0]
                 df_fetched['DateOnly'] = pd.to_datetime(df_fetched['DateOnly'], errors='coerce')
                 
-                # --- BURAYA EKLEYEBİLİRSİNİZ ---
-                st.write("🔍 Gelen verideki toplam deprem sayısı:", len(df_fetched))
-                if not df_fetched.empty and 'magnitude' in df_fetched.columns:
-                    st.write("🔍 Gelen verideki maksimum magnitüd:", df_fetched['magnitude'].max())
-                # --------------------------------
-                
                 st.session_state["deprem_df"] = df_fetched
                 st.success(f"✅ {len(df_fetched)} earthquakes fetched successfully!")
 
@@ -223,7 +175,6 @@ df = st.session_state["deprem_df"]
 if df is not None and not df.empty:
     filtered_df = df.copy()
 
-    # --- METRICS FRAME (Üst Özet Bilgi Kartları) ---
     c1, c2, c3 = st.columns(3)
     c1.metric("Total Earthquakes", len(filtered_df))
     
@@ -257,7 +208,6 @@ if df is not None and not df.empty:
         ("9.0<", 9.0, float('inf'), "#1a202c")
     ]
 
-    # --- TAB 1: FOLIUM MAP ONLY ---
     with tab1:
         st.subheader("Earthquake Map")
         
@@ -364,7 +314,6 @@ if df is not None and not df.empty:
             if map_data.get("zoom") is not None:
                 st.session_state["map_zoom"] = map_data["zoom"]
 
-    # --- TAB MAG: MAGNITUDE DISTRIBUTION CHART ---
     with tab_mag:
         st.subheader("Earthquake Count by Magnitude Range")
         
@@ -431,17 +380,14 @@ if df is not None and not df.empty:
 
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    # --- TAB 2: NUMBER OF EARTHQUAKES ---
     with tab2:
         st.subheader("Number of Earthquake")
         st.write(deprem_df)
 
-    # --- TAB 3: FILTERED DATA ---
     with tab3:
         st.subheader("Filtered Data")
         st.write(filtered_df)
 
-    # --- TAB 4: CHART ---
     with tab4:
         st.subheader("Chart")
         st.bar_chart(deprem_df.set_index('DateOnly'))
