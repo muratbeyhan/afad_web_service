@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 st.set_page_config(page_title="Turkey Earthquakes - AFAD Live", layout="wide")
 
+
 # ---------------------------------------------------------
 # 1. STATE INITIALIZATION
 # ---------------------------------------------------------
@@ -62,6 +63,7 @@ def afad_verilerini_getir(params):
             return None, f"HTTP Hata Kodu: {response.status_code}", response.text
     except Exception as e:
         return None, f"Bağlantı/İstek Hatası: {str(e)}", traceback.format_exc()
+    
 
 # ---------------------------------------------------------
 # 2. SIDEBAR PARAMETERS & API TRIGGER
@@ -163,6 +165,11 @@ with st.sidebar:
                 df_fetched = df_fetched.dropna(subset=["latitude", "longitude"])
                 df_fetched['DateOnly'] = df_fetched['Date'].str.split('T').str[0]
                 df_fetched['DateOnly'] = pd.to_datetime(df_fetched['DateOnly'], errors='coerce')
+                # --- BU SATIRLARI BURAYA EKLEYİN ---
+                st.write("🔍 Gelen verideki toplam deprem sayısı:", len(df_fetched))
+                if not df_fetched.empty and 'magnitude' in df_fetched.columns:
+                    st.write("🔍 Gelen verideki maksimum magnitüd:", df_fetched['magnitude'].max())
+                # -----------------------------------
                 
                 st.session_state["deprem_df"] = df_fetched
                 st.success(f"✅ {len(df_fetched)} earthquakes fetched successfully!")
