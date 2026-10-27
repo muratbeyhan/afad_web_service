@@ -429,7 +429,7 @@ if df is not None and not df.empty:
         fig_bar.update_layout(xaxis_tickangle=0, showlegend=False)
         fig_bar.update_yaxes(type="log")
 
-        st.plotly_chart(fig_bar, width=True)
+        st.plotly_chart(fig_bar, use_container_width=True)
 
     # --- TAB 2: NUMBER OF EARTHQUAKES ---
     with tab2:
